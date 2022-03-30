@@ -15,3 +15,7 @@ trabajos posteriores.
 
 ### Hipotesis Inicial:
 Crear una cuenta de GitHub, instalar un copilador y crear el programa de Hello World en C
+
+
+### Compilador utilizado:
+c11
