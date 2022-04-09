@@ -18,4 +18,4 @@ Crear una cuenta de GitHub, instalar un copilador y crear el programa de Hello W
 
 
 ### Compilador utilizado:
-c11
+c18
