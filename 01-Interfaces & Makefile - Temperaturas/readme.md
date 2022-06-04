@@ -1,7 +1,7 @@
 ## Autor:
-Usuario GitHub: MaximoBoglioli
-Nombre: Boglioli Máximo
-Legajo: 178.208-3
+Usuario GitHub: MaximoBoglioli  
+Nombre: Boglioli Máximo  
+Legajo: 178.208-3  
 
 ## Trabajo:
 TP #1 "Interfaces & Makefile — Temperaturas"
