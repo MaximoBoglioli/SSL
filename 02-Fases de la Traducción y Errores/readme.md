@@ -65,13 +65,13 @@ od -t x1 [ARCHIVO]
 	Además de que se encarga de copiar todos los archivos incluidos (#Include) y de borrar los comentarios.
 	
 	d) La linea 1 es una declaración de una función. Sabemos la función se llama "printf" que retorna un entero y que al menos recibe 1 dato tipo char \*.
-		Como dice const, también sabemos que el puntero (char \*) es de solo lectura y, por el restrict, SOLAMENTE él apunta al objeto que está apuntando.
+		Como dice const, también sabemos que el puntero (char \*) es de solo lectura y, por el restrict, SOLAMENTE él apunta al objeto que está apuntando (No hay solapamiento).
 
 	e) Para unicamente preprocesarlo, utilicé el siguiente comando:
 	gcc -E hello3.c -o hello3.i -P
 	
-	El archivo hello3.c y hello3.i son iguales
-	Agregué el -P para que no aparezcan los numerales al comienzo y de esta forma esten iguales.
+	El archivo hello3.c y hello3.i (si utilizamos el -P) son iguales
+	Agregué el -P para que no aparezcan los numerales al comienzo y de esta forma sean iguales. Estos numerales son datos que utiliza nuestro compilador, pero no afecta al programa.
 
 
 ###2. Compilación:
@@ -81,7 +81,7 @@ od -t x1 [ARCHIVO]
 	El archivo hello3.s no se genera ya que hay un error en el programa que evita que compile. También hay un warning, pero estos no evitan que compile.
 	
 	b) Corrigo el error que aparece cerrando la llave de main.
-	Utilizo el siguiente omando para generar hello4.s sin ensamblar
+	Utilizo el siguiente comando para generar hello4.s sin ensamblar
 	gcc -S hello4.i -o hello4.s
 	
 	c) El programa ensamblado hello4.s:
@@ -111,31 +111,45 @@ od -t x1 [ARCHIVO]
 	
 	el ejecutable da como resultado:
 		La respuesta es -214232192
-						2147483648
 	
-	El inicio es correcto (ya que el programa le dice que escriba "La respuesta es ") pero luego le decimos que escriba un número entero (con el %d) pero al no aclararlo, supongo que agarrará algun archivo basura.
-
+	El inicio es correcto (ya que el programa le dice que escriba "La respuesta es "). Sin embargo, luego le decimos que escriba un número entero (con el %d) pero no lo aclaramos. Esto hace que tenga un comportamiento indefinido.
+		**Se rompio el contrato, puede pasar cualquier cosa**
 
 ###4. 	Corrección de Bug
 	a) Yo supongo que querría que muestre el valor de i. Entonces lo corrijo para que muestre eso agregandolo al printf.
 	Utilizo el siguiente comando para convertirlo en ejecutable:
-	gcc hello6.c -o hello6.exe
+		gcc hello6.c -o hello6.exe
 	Al correrlo, verifico que funcionó como esperaba. Lo hago con el siguiente comando
 	hello6.exe
 
 
 ###5. Remoción de prototipo
-	b) El programa funciona porque el copilador de gcc ya conoce la explesión printf.
-		Podemos comprobar esto creando una versión modificada del archivo hello7.c cambiando el printf por otra función no conocida y no definida(por ejemplo yo puse la funcion PruebaNoExistente)
-	
-		Al tratar de compilarlo, a partir del paso de la compilación, aparece un warning, pero este es bastante diferente diferente para cada caso (Adjunto el archivo PruebasPunto5.md con las 2 warnings si quiere verlo)
+	b) Inicialmente, el programa nos muestra 2 warnings.
+		El primero indica que hicimos una declaración implicita de printf, y nos pide que la agreguemos.
+		El segundo, que la declaración implicita de print no encaja con la declaración por defecto que tiene el compilador para estos casos.
 
-		Allí vemos que detecta PARTICULARMENTE la función printf.
-		No hay más cambios a partir de ahora:
-			-Busque diferencias entre hello7.s y hello4.s, pero son casi iguales (el único cambio deduzco que es por agregar el i dentro del printf
-			-Busque diferencias entre hello7.o y hello4.o, hay 1 única línea de más, 1 linea modificada y el resto cambios menores. No creo que haya agregado una declaración de función o agregado el stdio.h en tan poco cambio
-			
-		Por lo tanto, concluyo que el compilador al momento de vincular, al ser printf una función conocida para este, busca la definición de printf en la biblioteca estandard.  
-		Esa es la razón que encuentro del porque el programa corre correctamente.
+		Por otro lado, el estandard no aclara qué debería hacer el compilador en caso de una declaración implicita.
+		Entonces, el programa funciona igualmente porque el compilador "gcc" (el que utilizo) tiene un nivel de flexibilidad mayor.
+			Y funciona correctamente, porque printf se encuentra en la biblioteca estandard. Por lo que tiene la definición sobre que hacer con la misma.
+
+
+###6. Compilación Separada: Contratos y Módulos
+	b) Con mi compilador, para generar un programa ejecutable en base a dos archivos .c, debo utilizar un comando con la siguiente estructura:
+		gcc [Archivo #1] [Archivo #2]
+	Utilizo el siguiente comando para generar el ejecutable:
+		gcc hello8.c studio1.c -o hello8.exe
+	Funciona correctamente
 	
+	c) Como gcc es muy permisivo, si agregamos o quitamos argumentos el programa funcionará. Sin embargo entrará en un estado de comportamiento indefinido.
+	Esto es así porque:
+		-Detecta la declaración implicita, pero la deja pasar porque así funciona gcc
+		-Despuáse el vinculador al ser muy básico, vincula la función con la declaración pero no chequea la cantidad de argumentos
+		-Luego de esto, lo ejecuta.
+		
+		Pero como está mal, ya que cambiaste la cantidad de argumentos, pasa a estar en comportamineto indefinido.
 	
+	En otros compiladores o en otros sistemas operativos puede que no funcione o que tenga un funcionamiento que no nos beneficie.
+	
+	d)
+		iv) La ventaja que otrorga incluir el contrato es que nos permite ver errores en el programa en tiempo de compilación.
+			Evitamos tener / reducimos la cantidad de veces que puede tener un comportamiento indefinido. Por lo que nos ayuda a tener un mejor programa.
